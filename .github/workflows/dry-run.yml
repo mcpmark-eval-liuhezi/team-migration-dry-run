@@ -1,0 +1,38 @@
+name: Dry Run
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  dry-run:
+    name: Trivial dry-run job
+    runs-on: ubuntu-latest
+    steps:
+      - name: Say hello
+        run: |
+          echo "dry-run started at $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          echo "this is a trivial job for the migration dry run"
+
+      - name: Build dry-run report
+        run: |
+          mkdir -p dry-run-report
+          {
+            echo "DRY-RUN-REPORT"
+            echo "run_date_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "runner=$(uname -sr)"
+            echo "repo=${GITHUB_REPOSITORY}"
+            echo "commit=${GITHUB_SHA}"
+            echo "workflow=${GITHUB_WORKFLOW}"
+            echo "status=ok"
+          } > dry-run-report/report.txt
+          cat dry-run-report/report.txt
+
+      - name: Upload dry-run report artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dry-run-report
+          path: dry-run-report/report.txt
+          if-no-files-found: error
